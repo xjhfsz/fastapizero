@@ -15,12 +15,18 @@ app = FastAPI()
 database = []
 
 
-@app.get('/', status_code=HTTPStatus.OK, response_model=Message)
+@app.get(
+    '/', status_code=HTTPStatus.OK, response_model=Message
+)
 def read_root():
     return {'message': 'Olá, mundo!'}
 
 
-@app.post('/users/', response_model=UserPublic, status_code=HTTPStatus.CREATED)
+@app.post(
+    '/users/',
+    response_model=UserPublic,
+    status_code=HTTPStatus.CREATED,
+)
 def create_user(user: UserSchema):
     user_with_id = UserDB(
         id=len(database) + 1,
