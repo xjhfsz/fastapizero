@@ -36,12 +36,12 @@ def create_user(user: UserSchema, session=Depends(get_session)):
         if db_user.username == user.username:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
-                detail='Já existe Username cadastro!',
+                detail='Username already exists!',
             )
         elif db_user.email == user.email:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
-                detail='Já existe eMail cadastrado!',
+                detail='Email already exists!',
             )
     db_user = User(
         username=user.username,
@@ -69,6 +69,11 @@ def read_users(
 @app.put('/users/{user_id}', response_model=UserPublic)
 def update_user(user_id: int, user: UserSchema, session=Depends(get_session)):
     db_user = session.scalar(select(User).where(User.id == user_id))
+    if not db_user:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='User not found!',
+        )
 
     db_user.username = user.username
     db_user.email = user.email
@@ -86,9 +91,21 @@ def delete_user(user_id: int, session=Depends(get_session)):
     if not db_user:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Usuário não existe!',
+            detail='User not found!',
         )
     session.delete(db_user)
     session.commit()
 
-    return {'message': 'Usuário excluído!'}
+    return {'message': 'User deleted!'}
+
+
+@app.get('/users/{user_id}', response_model=UserPublic)
+def read_user(user_id: int, session=Depends(get_session)):
+    db_user = session.scalar(select(User).where(User.id == user_id))
+
+    if not db_user:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail='User not found!'
+        )
+
+    return db_user
