@@ -49,6 +49,7 @@ def test_read_user(client, user):
         'id': user.id,
     }
 
+
 def test_read_user_deve_retornar_not_found(client):
     response = client.get('/users/666')
     assert response.status_code == HTTPStatus.NOT_FOUND
