@@ -56,21 +56,23 @@ def test_read_user_deve_retornar_not_found(client):
     assert response.json() == {'detail': 'User not found!'}
 
 
-def test_update_user(client, user):
+def test_update_user(client, user, token):
     response = client.put(
-        '/users/1',
+        f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
         json={
-            'username': 'user_test2',
-            'email': 'user2@test.com',
-            'password': '1234',
+            'password': 'password',
+            'username': 'bob',
+            'email': 'bob@test.com',
+            'id': user.id,
         },
     )
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        'id': 1,
-        'username': 'user_test2',
-        'email': 'user2@test.com',
+        'username': 'bob',
+        'email': 'bob@test.com',
+        'id': user.id,
     }
 
 
@@ -102,19 +104,21 @@ def test_create_user_deve_retornar_400_se_email_ja_existe(client, user):
     assert response.json() == {'detail': 'Email already exists!'}
 
 
-def test_delete_user(client, user):
-    response = client.delete('/users/1')
+def test_delete_user(client, user, token):
+    response = client.delete(
+        f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {'message': 'User deleted!'}
 
 
-def test_delete_user_should_return_not_found(client):
+def test_delete_user_should_return_unauthorized(client):
     response = client.delete('/users/666')
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'User not found!'}
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
-def test_update_user_should_return_not_found(client):
+def test_update_user_should_return_unauthorized(client):
     response = client.put(
         '/users/666',
         json={
@@ -123,5 +127,32 @@ def test_update_user_should_return_not_found(client):
             'password': 'password',
         },
     )
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'User not found!'}
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_get_token(client, user):
+    response = client.post(
+        '/token',
+        data={
+            'username': user.email,
+            'password': user.clean_password,
+        },
+    )
+
+    token = response.json()
+
+    assert response.status_code == HTTPStatus.OK
+    assert 'access_token' in token
+    assert 'token_type' in token
+
+
+def test_get_token_should_return_bas_request(client, user):
+    response = client.post(
+        '/token',
+        data={
+            'username': 'username',
+            'password': 'password',
+        },
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
