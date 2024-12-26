@@ -28,7 +28,7 @@ addopts = '-p no:warnings'
 
 
 [tool.ruff]
-line-length = 80
+line-length = 79
 extend-exclude = ['migrations']
 
 [tool.ruff.lint]
@@ -43,7 +43,7 @@ quote-style = 'single'
 run = 'fastapi dev fastapizero/app.py'
 
 pre_test = 'task lint'
-test = 'pytest --cov=fastapizero -vv'
+test = 'pytest --cov=fastapizero -vv -x'
 post_test = 'coverage html'
 
 lint = 'ruff check . ; ruff check . --diff'
