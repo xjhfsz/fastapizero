@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from jwt import decode
 
-from fastapizero.security import create_access_token, settings
+from fastapizero.security import create_access_token, settings, get_current_user
 
 
 def test_jwt():
@@ -50,3 +50,4 @@ def test_get_current_user_does_not_exists(client):
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {'detail': 'Could not validate credentials!'}
+ 
