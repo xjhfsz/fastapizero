@@ -44,19 +44,19 @@ def test_read_user(client, user):
     }
 
 
-def test_read_user_deve_retornar_not_found(client):
+def test_read_user_should_return_not_found(client):
     response = client.get('/users/666')
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.json() == {'detail': 'User not found!'}
 
 
-def test_create_user_deve_retornar_400_se_usuario_ja_existe(client, user):
+def test_create_user_should_return_400_if_username_exists(client, user):
     response = client.post(
         '/users/',
         json={
             'username': user.username,
-            'email': 'novoemail@test.com',
-            'password': 'password_test',
+            'email': 'user@email.com',
+            'password': 'password',
         },
     )
 
@@ -64,13 +64,13 @@ def test_create_user_deve_retornar_400_se_usuario_ja_existe(client, user):
     assert response.json() == {'detail': 'Username already exists!'}
 
 
-def test_create_user_deve_retornar_400_se_email_ja_existe(client, user):
+def test_create_user_should_return_400_if_email_exists(client, user):
     response = client.post(
         '/users/',
         json={
-            'username': 'new_user',
+            'username': 'username',
             'email': user.email,
-            'password': 'password_test',
+            'password': 'password',
         },
     )
 
@@ -83,26 +83,27 @@ def test_update_user(client, user, token):
         f'/users/{user.id}',
         headers={'Authorization': f'Bearer {token}'},
         json={
-            'username': 'bob',
-            'email': 'bob@test.com',
-            'password': 'password',
+            'username': user.username,
+            'email': user.email,
+            'password': user.clean_password,
         },
     )
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        'username': 'bob',
-        'email': 'bob@test.com',
+        'username': user.username,
+        'email': user.email,
         'id': user.id,
     }
 
 
-def test_update_user_should_return_forbidden(client, user, token):
+def test_update_user_should_return_forbidden(client, other_user, token):
     response = client.put(
-        f'/users/{user.id + 1}',
+        f'/users/{other_user.id}',
+        headers={'Authorization': f'Bearer {token}'},
         json={
-            'username': user.username,
-            'email': user.email,
-            'password': user.clean_password,
+            'username': other_user.username,
+            'email': other_user.email,
+            'password': 'password',
         },
     )
     assert response.status_code == HTTPStatus.FORBIDDEN
@@ -118,9 +119,9 @@ def test_delete_user(client, user, token):
     assert response.json() == {'message': 'User deleted!'}
 
 
-def test_delete_user_should_return_forbidden(client, user, token):
+def test_delete_user_should_return_forbidden(client, other_user, token):
     response = client.delete(
-        f'/users/{user.id + 1}',
+        f'/users/{other_user.id}',
         headers={'Authorization': f'Bearer {token}'},
     )
     assert response.status_code == HTTPStatus.FORBIDDEN

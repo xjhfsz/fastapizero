@@ -11,7 +11,11 @@ from fastapizero.models import User
 from fastapizero.schemas import (
     Token,
 )
-from fastapizero.security import create_access_token, verify_password
+from fastapizero.security import (
+    create_access_token,
+    get_current_user,
+    verify_password,
+)
 
 router = APIRouter(
     prefix='/auth',
@@ -23,8 +27,13 @@ T_Session = Annotated[Session, Depends(get_session)]
 
 
 @router.post('/token', response_model=Token)
-def login_for_access_token(session: T_Session, form_data: T_OAuth2Form):
-    user = session.scalar(select(User).where(User.email == form_data.username))
+def login_for_access_token(
+    session: T_Session,
+    form_data: T_OAuth2Form,
+):
+    user = session.scalar(
+        select(User).where(User.email == form_data.username)
+    )
 
     if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(
@@ -35,3 +44,12 @@ def login_for_access_token(session: T_Session, form_data: T_OAuth2Form):
     access_token = create_access_token(data={'sub': user.email})
 
     return {'access_token': access_token, 'token_type': 'bearer'}
+
+
+@router.post('/refresh_token', response_model=Token)
+def refresh_access_token(
+    user: User = Depends(get_current_user),
+):
+    new_access_token = create_access_token(data={'sub': user.email})
+
+    return {'access_token': new_access_token, 'token_type': 'bearer'}

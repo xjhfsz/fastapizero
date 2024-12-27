@@ -66,20 +66,12 @@ def user(session):
 
 @pytest.fixture
 def other_user(session):
-    password = 'password'
-
-    user = UserFactory(
-        password=get_password_hash(password),
-    )
-
+    user = UserFactory()
     session.add(user)
     session.commit()
     session.refresh(user)
 
-    user.clean_password = password
-
     return user
-
 
 
 @pytest.fixture
