@@ -1,5 +1,11 @@
 import pytest
-from factory import Factory, LazyAttribute, Sequence
+from factory import (
+    Factory,
+    Faker,
+    LazyAttribute,
+    Sequence,
+    fuzzy,
+)
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -7,7 +13,12 @@ from sqlalchemy.pool import StaticPool
 
 from fastapizero.app import app
 from fastapizero.database import get_session
-from fastapizero.models import User, table_registry
+from fastapizero.models import (
+    Todo,
+    TodoState,
+    User,
+    table_registry,
+)
 from fastapizero.security import get_password_hash
 
 
@@ -18,6 +29,16 @@ class UserFactory(Factory):
     username = Sequence(lambda n: f'test{n}')
     email = LazyAttribute(lambda obj: f'{obj.username}@email.com')
     password = LazyAttribute(lambda obj: f'senha_{obj.username}')
+
+
+class TodoFactory(Factory):
+    class Meta:
+        model = Todo
+
+    title = Faker('text')
+    description = Faker('text')
+    state = fuzzy.FuzzyChoice(TodoState)
+    user_id = 1
 
 
 @pytest.fixture

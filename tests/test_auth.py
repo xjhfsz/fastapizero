@@ -50,7 +50,7 @@ def test_token_expired_after_time(client, user):
             data={
                 'username': user.email,
                 'password': user.clean_password,
-            }
+            },
         )
         assert response.status_code == HTTPStatus.OK
         token = response.json()['access_token']
@@ -64,7 +64,7 @@ def test_token_expired_after_time(client, user):
                 'username': 'usernamez',
                 'email': 'usernamez@email.com',
                 'password': 'password',
-            }
+            },
         )
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
