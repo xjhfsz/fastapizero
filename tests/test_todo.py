@@ -1,26 +1,30 @@
 from http import HTTPStatus
 
-from fastapizero.models import TodoState
+from fastapizero.models import Todo, TodoState
 from tests.conftest import TodoFactory
 
 
 # test_create_todo
-def test_create_todo(client, token):
-    response = client.post(
-        '/todos/',
-        headers={'Authorization': f'Bearer {token}'},
-        json={
-            'title': 'Test',
-            'description': 'Test',
-            'state': 'Draft',
-        },
-    )
+def test_create_todo(client, token, mock_db_time):
+    with mock_db_time(model=Todo) as time:
+        response = client.post(
+            '/todos/',
+            headers={'Authorization': f'Bearer {token}'},
+            json={
+                'title': 'Test',
+                'description': 'Test',
+                'state': 'Draft',
+            },
+        )
+
     assert response.json() == {
         'id': 1,
         'title': 'Test',
         'description': 'Test',
         'state': 'Draft',
         'user_id': 1,
+        'created_at': time.isoformat(),
+        'updated_at': time.isoformat(),
     }
 
 
@@ -197,3 +201,31 @@ def test_patch_todo(client, session, token, user):
     assert response.status_code == HTTPStatus.OK
     assert response.json()['title'] == 'Título teste'
     assert response.json()['description'] == todo.description
+
+
+# teste exercício todos atributos OK
+def test_list_todos_should_return_all_expected_fields(
+    session, client, user, token, mock_db_time
+):
+    with mock_db_time(model=Todo) as time:
+        todo = TodoFactory(user_id=user.id)
+        session.add(todo)
+        session.commit()
+
+    session.refresh(todo)
+    response = client.get(
+        '/todos/',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.json()['todos'] == [
+        {
+            'id': todo.id,
+            'title': todo.title,
+            'description': todo.description,
+            'state': todo.state,
+            'user_id': todo.user_id,
+            'created_at': time.isoformat(),
+            'updated_at': time.isoformat(),
+        }
+    ]

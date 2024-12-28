@@ -28,7 +28,7 @@ def create_todo(
     user: T_User,
     session: T_Session,
 ):
-    db_todo = Todo(
+    db_todo: Todo = Todo(
         title=todo.title,
         description=todo.description,
         state=todo.state,
