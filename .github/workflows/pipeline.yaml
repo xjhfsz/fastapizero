@@ -24,7 +24,9 @@ jobs:
         run: |
           pipx install poetry
           pipx ensurepath
-          export PATH=$PATH:/root/.local/bin
+          echo "::add-path::$(python3 -m site --user-base)/bin"
+          echo "export PATH=\$PATH:$(python3 -m site --user-base)/bin" >> $GITHUB_ENV
+          echo "export PATH=\$PATH:/root/.local/bin" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: poetry install
