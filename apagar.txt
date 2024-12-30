@@ -1,0 +1,18 @@
+
+Postgres cluster fastapizero-db created
+  Username:    postgres
+  Password:    jQm5BVSswQWQ7RS
+  Hostname:    fastapizero-db.internal
+  Flycast:     fdaa:c:96cf:0:1::4
+  Proxy port:  5432
+  Postgres port:  5433
+  Connection string: postgres://postgres:jQm5BVSswQWQ7RS@fastapizero-db.flycast:5432
+
+
+Created app 'fastapizero' in organization 'personal'
+Admin URL: https://fly.io/apps/fastapizero
+Hostname: fastapizero.fly.dev
+
+
+
+DATABASE_URL="postgresql+psycopg://fastapizero:UteGuHeK3y2hEnz@fastapizero-db.flycast:5432/fastapizero"
